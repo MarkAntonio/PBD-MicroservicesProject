@@ -2,6 +2,8 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=pycharm,flask,venv
 
 ### Flask ###
+.testMicroservice/
+.testMicroservice/*
 instance/*
 !instance/.gitignore
 .webassets-cache
