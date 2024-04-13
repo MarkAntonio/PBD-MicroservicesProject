@@ -17,6 +17,7 @@ def login():
     payload = {
         'name': request.form.get('name')
     }
+    print(payload)
     #username será a primary key. Password não deverá ser passado no token de devolução
     user_verified = DAO_user.get_user(User(payload['name']))
 
@@ -24,15 +25,18 @@ def login():
         token = jwt.encode(payload=payload, key=key)
         return jsonify({'token': token}), 200
     
-    return make_response(jsonify({'Error': 'user not found'}), 400)  
+    return make_response(jsonify({'Error': 'Usuário ou senha inválidos'}), 400)  
 
 
 @app_user.route('/api/v1/authorization/validation/', methods=['POST'])
 def auth():
+
     try:
         # o token será passado na aba Headers do Insomnia. pra acessálo usarei a headers do request
         token = jwt.decode(request.headers.get('authorization'), key, algorithms=['HS256'])
+        print(token)
         user_verified = DAO_user.get_user(User(token['name']))
+        # if user_verified is not None
         if user_verified is not None:
             return {}  # 200 token Válido
         else:
