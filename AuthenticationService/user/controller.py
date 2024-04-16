@@ -30,10 +30,9 @@ def login():
 
 @app_user.route('/api/v1/authorization/validation/', methods=['POST'])
 def auth():
-
     try:
         # o token será passado na aba Headers do Insomnia. pra acessálo usarei a headers do request
-        token = jwt.decode(request.headers.get('authorization'), key, algorithms=['HS256'])
+        token = jwt.decode(request.headers.get('token'), key, algorithms=['HS256'])
         print(token)
         user_verified = DAO_user.get_user(User(token['name']))
         # if user_verified is not None

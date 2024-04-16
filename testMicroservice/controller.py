@@ -1,4 +1,5 @@
 from flask import Blueprint, make_response, request as flask_request, jsonify
+from dao import DAOClient
 
 import requests
 import jwt
@@ -30,12 +31,16 @@ def login():
     return make_response(jsonify(response.json()))
 
 
-@app_test.route('/clients/', methods=['GET'])
+@app_test.route('/api/v1/clients/', methods=['GET'])
 def get_clients():
     header = {
         "token": flask_request.headers.get('authorization')
         }
     response = requests.post(url='http://localhost:5000/api/v1/authorization/validation/', headers=header)
-
-    print(response.status_code)
-    return jsonify({})
+    
+    if response.status_code == 200:
+        return DAOClient().get_client()
+    elif response.status_code == 401:
+        return make_response(jsonify({'error': 'user not authorized'}, 401))
+    else:
+        return make_response(response.json(), response.status_code)

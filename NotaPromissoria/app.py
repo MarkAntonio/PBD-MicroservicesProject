@@ -1,10 +1,12 @@
 from flask import Flask
-from controller import app_test
 from connect import ConnectDataBase
+from client.controller import app_client
+
 
 app = Flask(__name__)
-app.register_blueprint(app_test)
-ConnectDataBase().init_table().
+ConnectDataBase().init_table()
+app.register_blueprint(app_client)
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
