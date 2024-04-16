@@ -8,7 +8,7 @@ class ConnectDataBase:
             host='localhost',
             database='pbd2024_1',
             user='postgres',
-            password='91397114'
+            password='admin'
         )
 
     def get_instance(self):

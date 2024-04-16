@@ -1,15 +1,14 @@
 import psycopg2
-from NotaPromissoria.client.sql import SQLClient
-
+from client.sql import SQLClient
 
 
 class ConnectDataBase:
     def __init__(self):
         self.connection = psycopg2.connect(
             host='localhost',
-            database='notaPromissoria',
+            database='pbd2024_1',
             user='postgres',
-            password='postgres'
+            password='admin'
         )
 
     def get_instance(self):

@@ -1,37 +1,23 @@
-from flask import Blueprint, make_response, request, jsonify
-from NotaPromissoria.client.dao import DAOClient
-from NotaPromissoria.client.modelo import Client
-import jwt
+from flask import Blueprint, make_response, request as flask_request, jsonify
+from .dao import DAOClient
+import requests
+
 
 app_client = Blueprint('app_client', __name__)
-
-module_name = 'client'
 DAOClient = DAOClient()
 
 
-key = 'CHAVE_s3cr3t4'
-
 @app_client.route('/api/v1/clients/', methods=['GET'])
 def get_client():
-    clients = DAOClient.get_all()
-    return make_response(jsonify(clients))
-
-
-@app_client.route('/api/v1/clients/token/', methods=['POST'])
-def login():
-    payload = {
-        'name': request.form.get('name')
-    }
-    print(payload)
-    client_verified = DAOClient.get_Client(Client(payload['name']))
-
-    if client_verified is not None:
-        token = jwt.encode(payload=payload, key=key)
-        return jsonify({'token': token}), 200
+    header = {
+        "token": flask_request.headers.get('authorization')
+        }
+    response = requests.post(url='http://localhost:5000/api/v1/authorization/validation/', headers=header)
     
-    return make_response(jsonify({'Error': 'Usuário ou senha inválidos'}), 400)  
-
-
-@app_client.route('/api/v1/authorization/validation/', methods=['POST'])
-def auth():
-    return
+    if response.status_code == 200:
+        clients = DAOClient.get_all()      
+        return jsonify(clients)
+    elif response.status_code == 401:
+        return make_response(jsonify({'error': 'user not authorized'}), 401)
+    else:
+        return make_response(response.json(), response.status_code)
