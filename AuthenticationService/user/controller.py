@@ -1,6 +1,6 @@
 from flask import Blueprint, make_response, request, jsonify
-from user.dao import DAOUser
-from user.modelo import User
+from .dao import DAOUser
+from .modelo import User
 import jwt
 
 app_user = Blueprint('app_user', __name__)

@@ -6,7 +6,7 @@ class ConnectDataBase:
     def __init__(self):
         self.connection = psycopg2.connect(
             host='localhost',
-            database='pbd2024_1',
+            database='nota_promissoria_PBD_2024.1',
             user='postgres',
             password='admin'
         )
