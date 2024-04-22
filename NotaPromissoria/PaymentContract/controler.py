@@ -7,7 +7,7 @@ app_payment_contract = Blueprint('app_payment_contract', __name__)
 dao_payment_contract = DAOPaymentContract()
 
 
-@app_payment_contract.route('api/v1/payment-contract/', methods=['POST'])
+@app_payment_contract.route('/api/v1/payment-contract/', methods=['POST'])
 def create_payment_contract():
 
     payload = {
