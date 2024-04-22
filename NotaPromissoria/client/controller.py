@@ -15,7 +15,7 @@ def get_client():
     response = requests.post(url='http://localhost:5000/api/v1/authorization/validation/', data=payload)
     
     if response.status_code == 200:
-        clients = DAOClient.get_all()      
+        clients = DAOClient.get_all()    
         return jsonify({"response": clients})
     elif response.status_code == 401:
         return make_response(jsonify({'erro': 'Usuário não autorizado'}), 401)
