@@ -2,6 +2,7 @@ from flask import Blueprint, make_response, request as flask_request, jsonify
 from .dao import DAOPaymentContract
 from .modelo import PaymentContract
 import requests
+import traceback
 
 
 app_payment_contract = Blueprint('app_payment_contract', __name__)
@@ -30,6 +31,7 @@ def create_payment_contract():
         except Exception as e:
             # desfaz a pré-alteração para conseguir fazer uso novamente da conexão da base.
             dao_payment_contract.rollback_transaction()
+            traceback.print_exc()
             return make_response(jsonify({"Erro": e.args[0]}), 500)
     elif response.status_code == 401:
         return make_response(jsonify({'erro': 'Usuário não autorizado'}), 401)
@@ -61,9 +63,13 @@ def update_payment_contract(id: int):
             dao_payment_contract.update(updated_contract)
             return jsonify({"pay": updated_contract.get_json()})
         except Exception as e:
-            return make_response(jsonify({"Erro": e.args[0]}), 500)
-        
-    return make_response(response.json(), response.status_code)
+             dao_payment_contract.rollback_transaction()
+             traceback.print_exc()
+             return make_response(jsonify({"Erro": e.args[0]}), 500)
+    elif response.status_code == 401:
+        return make_response(jsonify({'erro': 'Usuário não autorizado'}), 401)
+    else:
+        return make_response(response.json(), response.status_code)
 
 
 def __authorize() -> requests.Response:

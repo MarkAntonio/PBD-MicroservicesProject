@@ -16,7 +16,7 @@ class DAOClient(object):
         cursor.close()
         return client_verified
     
-    def get_all(self) -> list[Client]:
+    def get_all(self) -> list[dict[str, any]]:
         cursor = self.connect.cursor()
         sql = SQLClient._SELECT
         cursor.execute(sql)

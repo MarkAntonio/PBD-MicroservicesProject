@@ -25,20 +25,19 @@ class DAOPaymentContract(object):
 				.format(SQLPaymentContract._TABLE_NAME, id)
 
 			cursor.execute(sql)
-			row = cursor.fetchall()
+			row = cursor.fetchone()
 			if row:
-				columns = [descricao[0] for descricao in cursor.description]
-			
-				for contract in row:
-					contract_dict = dict(zip(columns, contract))
-					payment_contract = PaymentContract(**contract_dict)
+				column_name = [descricao[0] for descricao in cursor.description]
+				contract_dict = dict(zip(column_name, row))
+				payment_contract = PaymentContract(**contract_dict)
+				print(payment_contract)
 		return payment_contract
 
 	def update(self, new_contract: PaymentContract):
 		cursor = self.connect.cursor()
 		sql = SQLPaymentContract._UPDATE
 		cursor.execute(sql,
-                (new_contract.description, new_contract.value, new_contract.client_id, new_contract.number_months, new_contract.first_payment, new_contract.id)
+                (new_contract.description, new_contract.value, new_contract.client_id, new_contract.number_months, new_contract.first_payment, str(new_contract.id))
 			)
 		self.connect.commit()
 		cursor.close()

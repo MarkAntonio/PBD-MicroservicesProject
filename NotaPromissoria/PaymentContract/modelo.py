@@ -26,24 +26,36 @@ class PaymentContract():
         datetime_obj = datetime.datetime.strptime(str_date, cls.DATE_FORMAT)
         return datetime_obj.date()
 
-    @classmethod
-    def date_to_string(cls, date: datetime.date) -> str:
-        """ Transforma um objeto "date" do módulo datetime em uma string de acordo com o padrão de formatação pré configurado aqui.
-        """
-        return date.strftime(cls.DATE_FORMAT)
+    # @classmethod
+    # def date_to_string(cls, date: datetime.date) -> str:
+    #     """ Transforma um objeto "date" do módulo datetime em uma string de acordo com o padrão de formatação pré configurado aqui.
+    #     """
+    #     return date.strftime(cls.DATE_FORMAT)
 
-    @classmethod
-    def datetime_to_string(cls, datetime: datetime.datetime):
-        return datetime.strftime(cls.DATETIME_FORMAT)
+    # @classmethod
+    # def datetime_to_string(cls, datetime: datetime.datetime):
+    #     return datetime.strftime(cls.DATETIME_FORMAT)
+    
+    def get_str_created_at(self):
+        """Retorna o atributo self.created_at do tipo datetime como uma String formatada no padrão %d/%m/%Y %H:%M:%S. 
+        ex: 29/04/2024 15:05:58
+        """
+        return self.created_at.strftime(self.DATETIME_FORMAT)
+    
+    def get_str_first_payment(self) -> str:
+        """Retorna o atributo self.first_payment do tipo date como uma String formatada no padrão %d/%m/%Y. 
+        ex: 29/04/2024
+        """
+        return self.first_payment.strftime(self.DATE_FORMAT)
 
     def get_json(self):
         return {
             'id': self.id,
             'description': self.description,
             'value': self.value,
-            'create_at': self.datetime_to_string(self.created_at),
+            'created_at': self.get_str_created_at(),
             'number_months': self.number_months,
-            'first_payment': self.date_to_string(self.first_payment),
+            'first_payment': self.get_str_first_payment(),
             'client_id': self.client_id
         }
 
