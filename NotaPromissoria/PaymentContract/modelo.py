@@ -1,12 +1,18 @@
 import datetime
+
+
 class PaymentContract():
 
     DATE_FORMAT = "%d/%m/%Y"
+    DATETIME_FORMAT = "%d/%m/%Y %H:%M:%S"
 
-    def __init__(self, description, value, number_months, first_payment: datetime.date, client_id=None, id=None):
+    def __init__(self, description, value, number_months, first_payment: datetime.date, client_id=None, id=None, created_at=None):
         self.description = description
         self.value = value
-        self.created_at = datetime.datetime.now()
+        if created_at:
+            self.created_at = created_at
+        else:
+            self.created_at = datetime.datetime.now()
         self.number_months = number_months
         self.first_payment = first_payment
         self.client_id = client_id
@@ -26,18 +32,23 @@ class PaymentContract():
         """
         return date.strftime(cls.DATE_FORMAT)
 
-    def __str__(self):
-        return f'ID: {self.id} - description: {self.description} - value:{self.value}'\
-            f'\n- create_at: {self.create_at} - number_months:{self.number_months}'\
-            f'\n- first_payment:{self.first_payment} - client_id:{self.client_id} '
+    @classmethod
+    def datetime_to_string(cls, datetime: datetime.datetime):
+        return datetime.strftime(cls.DATETIME_FORMAT)
 
     def get_json(self):
         return {
             'id': self.id,
             'description': self.description,
             'value': self.value,
-            'create_at': self.created_at,
+            'create_at': self.datetime_to_string(self.created_at),
             'number_months': self.number_months,
-            'first_payment': self.first_payment,
+            'first_payment': self.date_to_string(self.first_payment),
             'client_id': self.client_id
         }
+
+    def __str__(self):
+        return f'ID: {self.id} - description: {self.description} - value:{self.value}'\
+            f'\n- create_at: {self.created_at} - number_months:{self.number_months}'\
+            f'\n- first_payment:{self.first_payment} - client_id:{self.client_id} '
+    

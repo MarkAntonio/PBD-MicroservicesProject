@@ -23,3 +23,4 @@ class SQLPaymentContract:
     _SELECT_BY_ID = 'SELECT * FROM {} WHERE ID={}'
     _SELECT_BY_NAME = "SELECT * FROM {} WHERE NAME='{}'"
     _DELETE = 'DELETE FROM {} WHERE ID={}'
+    _UPDATE = f'UPDATE {_TABLE_NAME} SET description=%s, value=%s, client_id=%s, number_months=%s, first_payment=%s WHERE ID=%s'
