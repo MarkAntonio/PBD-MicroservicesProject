@@ -1,4 +1,5 @@
 import datetime
+#from NotaPromissoria.client.dao import DAOClient
 
 
 class PaymentContract():
@@ -59,8 +60,10 @@ class PaymentContract():
             'client_id': self.client_id
         }
 
-    def __str__(self):
-        return f'ID: {self.id} - description: {self.description} - value:{self.value}'\
-            f'\n- create_at: {self.created_at} - number_months:{self.number_months}'\
-            f'\n- first_payment:{self.first_payment} - client_id:{self.client_id} '
+    #def __str__(self):
+        #client = DAOClient().get_Client_by_id(self.client_id)
+        #return f'id: {self.id} \ndescription: {self.description} \nvalue:{self.value}'\
+        #    f'\ncreate_at: {self.created_at} \nnumber_months:{self.number_months}'\
+        #    f'\nfirst_payment:{self.first_payment} \nclient:{client.id, client.name} '
+
     

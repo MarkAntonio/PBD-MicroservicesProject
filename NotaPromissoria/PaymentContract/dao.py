@@ -43,7 +43,21 @@ class DAOPaymentContract(object):
 		cursor.close()
 
 	def get_all(self):
-		return
+		with self.connect.cursor() as cursor:
+			sql = SQLPaymentContract._JOIN_CLIENT
+			cursor.execute(sql)
+			all_contract = cursor.fetchall()
+			contracts_list = []
+			if all_contract:
+				columns = [descricao[0] for descricao in cursor.description ]
+
+				for contract_find in all_contract:
+					contract_dict = dict(zip(columns, contract_find))
+					contract_dict['client'] = {'client_id': contract_dict['client_id'], 'name': contract_dict['name']}
+					del contract_dict['client_id']
+					del contract_dict['name']
+					contracts_list.append(contract_dict)
+		return contracts_list
 
 	def rollback_transaction(self):
 		return self.connect.rollback()

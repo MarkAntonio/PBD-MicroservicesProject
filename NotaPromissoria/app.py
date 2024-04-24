@@ -1,12 +1,12 @@
 from flask import Flask
 from connect import ConnectDataBase
 from PaymentContract.controler import app_payment_contract
-from PaymentContract.modelo import PaymentContract
-from datetime import datetime
+from client.controller import app_client
 
 app = Flask(__name__)
 ConnectDataBase().init_table()
 app.register_blueprint(app_payment_contract)
+app.register_blueprint(app_client)
 
 
 if __name__ == "__main__":

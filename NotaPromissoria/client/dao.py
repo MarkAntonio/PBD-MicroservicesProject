@@ -30,3 +30,11 @@ class DAOClient(object):
             clients_list.append(client.get_json())
         cursor.close()
         return clients_list
+
+    def get_Client_by_id(self, id):
+        cursor = self.connect.cursor()
+        cursor.execute(SQLClient._SELECT_BY_ID.format(SQLClient._TABLE_NAME, id))
+        client_verified = cursor.fetchone()
+        cursor.close()
+        return client_verified
+        
