@@ -1,6 +1,7 @@
 import psycopg2
 from PaymentContract.sql import SQLPaymentContract
 from client.sql import SQLClient
+from PaymentClient.sql import SQLPaymentClient
 
 
 class ConnectDataBase:
@@ -19,5 +20,6 @@ class ConnectDataBase:
         cursor = self.connection.cursor()
         cursor.execute(SQLClient._CREATE_TABLE)
         cursor.execute(SQLPaymentContract._CREATE_TABLE)
+        cursor.execute(SQLPaymentClient._CREATE_TABLE)
         self.connection.commit()
         cursor.close()

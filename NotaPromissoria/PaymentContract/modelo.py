@@ -60,10 +60,9 @@ class PaymentContract():
             'client_id': self.client_id
         }
 
-    #def __str__(self):
-        #client = DAOClient().get_Client_by_id(self.client_id)
-        #return f'id: {self.id} \ndescription: {self.description} \nvalue:{self.value}'\
-        #    f'\ncreate_at: {self.created_at} \nnumber_months:{self.number_months}'\
-        #    f'\nfirst_payment:{self.first_payment} \nclient:{client.id, client.name} '
+    def __str__(self):
+        return f'id: {self.id} \ndescription: {self.description} \nvalue:{self.value}'\
+           f'\ncreate_at: {self.created_at} \nnumber_months:{self.number_months}'\
+           f'\nfirst_payment:{self.first_payment}'
 
     
