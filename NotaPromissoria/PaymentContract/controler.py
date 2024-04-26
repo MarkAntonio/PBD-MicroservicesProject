@@ -73,6 +73,24 @@ def update_payment_contract(id: int):
         return make_response(response.json(), response.status_code)
 
 
+@app_payment_contract.route('/api/v1/payment-contract/', methods=['GET'])
+def list_payment_contracts():
+    response = __authorize()
+
+    if response.status_code == 200:
+        try:
+            list_contracts = dao_payment_contract.get_all()
+            return jsonify({"response :": list_contracts})
+        except Exception as e:
+            dao_payment_contract.rollback_transaction()
+            traceback.print_exc()
+            return make_response(jsonify({"Erro": e.args[0]}), 500)
+    elif response.status_code == 401:
+        return make_response(jsonify({'erro': 'Usuário não autorizado'}), 401)
+    else:
+        return make_response(response.json(), response.status_code)
+
+
 def __authorize() -> requests.Response:
     token = {
         "authorization": flask_request.headers.get('authorization')
