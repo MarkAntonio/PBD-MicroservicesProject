@@ -24,8 +24,10 @@ def create_payment_contract():
             "first_payment": PaymentContract.str_to_date(str_date)
         }
         try:
-            payment_id = dao_payment_contract.save(PaymentContract(**payload))
+            payment_contract = PaymentContract(**payload)
+            payment_id = dao_payment_contract.save(payment_contract)
             if payment_id:
+                dao_payment_contract.generate_payment_record(payment_contract)
                 return jsonify({"id": payment_id})
             else:
                 return make_response(jsonify({"Erro": "Campos obrigatórios"}), 400)
@@ -98,3 +100,34 @@ def __authorize() -> requests.Response:
     response = requests.post(
         url='http://localhost:5000/api/v1/authorization/validation/', data=token)
     return response
+
+
+'''
+@app_payment_contract.route('/payment-contract/', methods=['POST'])
+def create_payment_contract():
+    response = __authorize()
+
+    if response.status_code == 200:
+        str_date = flask_request.form.get("first_payment")
+        payload = {
+            "description": flask_request.form.get("description"),
+            "value": flask_request.form.get("value"),
+            "client_id": flask_request.form.get("client_id"),
+            "number_months": flask_request.form.get("number_months"),
+            "first_payment": PaymentContract.str_to_date(str_date)
+        }
+        try:
+            payment_id = dao_payment_contract.save(PaymentContract(**payload))
+            if payment_id:
+                return jsonify({"id": payment_id})
+            else:
+                return make_response(jsonify({"Erro": "Campos obrigatórios"}), 400)
+        except Exception as e:
+            # desfaz a pré-alteração para conseguir fazer uso novamente da conexão da base.
+            dao_payment_contract.rollback_transaction()
+            traceback.print_exc()
+            return make_response(jsonify({"Erro": e.args[0]}), 500)
+    elif response.status_code == 401:
+        return make_response(jsonify({'erro': 'Usuário não autorizado'}), 401)
+    else:
+        return make_response(response.json(), response.status_code)'''
