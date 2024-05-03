@@ -1,7 +1,8 @@
 from .modelo import PaymentContract
 from ..connect import ConnectDataBase
 from .sql import SQLPaymentContract
-
+from datetime import timedelta
+from NotaPromissoria.PaymentClient.sql import SQLPaymentClient
 
 class DAOPaymentContract(object):
 
@@ -69,3 +70,15 @@ class DAOPaymentContract(object):
 
 	def rollback_transaction(self):
 		return self.connect.rollback()
+
+	def generate_payment_record(self, paymentContract : PaymentContract):
+		value_payment_record = paymentContract.value / paymentContract.number_months
+		datePaymentRecord = paymentContract.first_payment
+		cursor = self.connect.cursor()
+		for i in range(paymentContract.number_months):
+			sql = SQLPaymentClient._INSERT
+			cursor.execute(sql(paymentContract.id, value_payment_record, datePaymentRecord, 'PENDING'))
+			datePaymentRecord += timedelta(days=30)
+		self.connect.commit()
+		cursor.close()
+		
