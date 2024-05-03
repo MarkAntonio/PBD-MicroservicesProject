@@ -1,7 +1,7 @@
 from flask import Flask
-from connect import ConnectDataBase
-from PaymentContract.controler import app_payment_contract
-from client.controller import app_client
+from NotaPromissoria.connect import ConnectDataBase
+from NotaPromissoria.PaymentContract.controler import app_payment_contract
+from NotaPromissoria.client.controller import app_client
 
 app = Flask(__name__)
 ConnectDataBase().init_table()

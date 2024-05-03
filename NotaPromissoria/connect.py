@@ -1,7 +1,7 @@
 import psycopg2
-from PaymentContract.sql import SQLPaymentContract
-from client.sql import SQLClient
-from PaymentClient.sql import SQLPaymentClient
+from NotaPromissoria.PaymentContract.sql import SQLPaymentContract
+from .client.sql import SQLClient
+from .PaymentClient.sql import SQLPaymentClient
 
 
 class ConnectDataBase:

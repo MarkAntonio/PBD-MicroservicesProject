@@ -1,7 +1,6 @@
-
 from .modelo import Client
 from .sql import SQLClient
-from connect import ConnectDataBase
+from ..connect import ConnectDataBase
 
 
 class DAOClient(object):

@@ -1,5 +1,5 @@
 from .modelo import PaymentContract
-from connect import ConnectDataBase
+from ..connect import ConnectDataBase
 from .sql import SQLPaymentContract
 
 
@@ -18,30 +18,6 @@ class DAOPaymentContract(object):
 		cursor.close()
 		return id
 
-	def get_by_id(self, id: int) -> PaymentContract:
-		payment_contract = None
-		with self.connect.cursor() as cursor:
-			sql = SQLPaymentContract._SELECT_BY_ID\
-				.format(SQLPaymentContract._TABLE_NAME, id)
-
-			cursor.execute(sql)
-			row = cursor.fetchone()
-			if row:
-				column_name = [descricao[0] for descricao in cursor.description]
-				contract_dict = dict(zip(column_name, row))
-				payment_contract = PaymentContract(**contract_dict)
-				print(payment_contract)
-		return payment_contract
-
-	def update(self, new_contract: PaymentContract):
-		cursor = self.connect.cursor()
-		sql = SQLPaymentContract._UPDATE
-		cursor.execute(sql,
-                (new_contract.description, new_contract.value, new_contract.client_id, new_contract.number_months, new_contract.first_payment, str(new_contract.id))
-			)
-		self.connect.commit()
-		cursor.close()
-
 	def get_all(self):
 		with self.connect.cursor() as cursor:
 			sql = SQLPaymentContract._JOIN_CLIENT
@@ -56,8 +32,40 @@ class DAOPaymentContract(object):
 					contract_dict['client'] = {'client_id': contract_dict['client_id'], 'name': contract_dict['name']}
 					del contract_dict['client_id']
 					del contract_dict['name']
+					contract_dict['first_payment'] = PaymentContract.date_to_string(contract_dict['first_payment'])
+					contract_dict['created_at'] = PaymentContract.datetime_to_string(contract_dict['created_at'])
 					contracts_list.append(contract_dict)
 		return contracts_list
+
+	def get_by_id(self, id: int) -> PaymentContract:
+		payment_contract = None
+		with self.connect.cursor() as cursor:
+			sql = SQLPaymentContract._SELECT_BY_ID\
+				.format(SQLPaymentContract._TABLE_NAME, id)
+
+			cursor.execute(sql)
+			row = cursor.fetchone()
+			if row:
+				column_name = [descricao[0] for descricao in cursor.description]
+				contract_dict = dict(zip(column_name, row))
+				payment_contract = PaymentContract(**contract_dict)
+		return payment_contract
+
+	def update(self, new_contract: PaymentContract):
+		cursor = self.connect.cursor()
+		sql = SQLPaymentContract._UPDATE
+		cursor.execute(sql,
+                (new_contract.description, new_contract.value, new_contract.client_id, new_contract.number_months, new_contract.first_payment, str(new_contract.id))
+			)
+		self.connect.commit()
+		cursor.close()
+
+	def update_description(self, description: str, id: int):
+		cursor = self.connect.cursor()
+		sql = SQLPaymentContract._UPDATE_DESCRIPTION
+		cursor.execute(sql, (description, str(id)))
+		self.connect.commit()
+		cursor.close()
 
 	def rollback_transaction(self):
 		return self.connect.rollback()

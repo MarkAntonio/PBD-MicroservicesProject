@@ -9,7 +9,6 @@ class SQLPaymentClient:
     _COL_VALUE_PAID = 'value_paid'
     _COL_DATE_PAID = 'date_paid'
    
-
     _CREATE_TABLE = f'''CREATE TABLE IF NOT EXISTS {_TABLE_NAME}(
         {_COL_ID} SERIAL PRIMARY KEY,
         {_COL_CONTRACT_ID} INT REFERENCES paymentcontract(id),
@@ -23,6 +22,6 @@ class SQLPaymentClient:
         VALUES (%S, %S, %S, %S) RETURNING ID;"
     _SELECT_ALL = f'SELECT * FROM {_TABLE_NAME};'
     # _UPDATE_STATUS =  f'UPDATE {_TABLE_NAME} SET {_COL_STATUS}=%s,  WHERE ??????'
-    _SELECT_BY_CONTRACT_ID = f'SELECT * FROM {_TABLE_NAME} WHERE contract_id=%s;'
-    _DELETE_ALL = f'DELETE FROM {_TABLE_NAME} WHERE contract_id=%s;'
+    _SELECT_BY_CONTRACT_ID = 'SELECT * FROM {} WHERE contract_id={};'
+    _DELETE_ALL = 'DELETE FROM {} WHERE contract_id={};'
 

@@ -1,4 +1,6 @@
 from flask import Blueprint, make_response, request as flask_request, jsonify
+
+from NotaPromissoria.PaymentClient.dao import DAOPaymentClient
 from .dao import DAOPaymentContract
 from .modelo import PaymentContract
 import requests
@@ -8,7 +10,7 @@ import traceback
 app_payment_contract = Blueprint(
     'app_payment_contract', __name__, url_prefix='/api/v1')
 dao_payment_contract = DAOPaymentContract()
-
+dao_payment_client = DAOPaymentClient()
 
 @app_payment_contract.route('/payment-contract/', methods=['POST'])
 def create_payment_contract():
@@ -40,7 +42,7 @@ def create_payment_contract():
         return make_response(response.json(), response.status_code)
 
 
-@app_payment_contract.route('/api/v1/payment-contract/<int:id>', methods=['PUT'])
+@app_payment_contract.route('/payment-contract/<int:id>', methods=['PUT'])
 def update_payment_contract(id: int):
     response = __authorize()
 
@@ -59,10 +61,42 @@ def update_payment_contract(id: int):
         }
 
         updated_contract = PaymentContract(**payload, id=contract_verified.id)
+        payment_clients_list = dao_payment_client.get_all_payments_by_contract_id(id)
 
+        can_edit = True
+        for payment in payment_clients_list:
+            if payment['status'] not in ('PENDING', 'LATE'):
+                can_edit = False
+                break
+           
         try:
-            dao_payment_contract.update(updated_contract)
-            return jsonify({"pay": updated_contract.get_json()})
+            # caso não tenha sido pago, deleto os paymentClient e recrio.
+            if can_edit:
+                # deletando
+                dao_payment_client.delete_all_by_contract_id(id)
+                # criar
+
+                # editar
+                dao_payment_contract.update(updated_contract)
+
+            else:
+                # caso envie mais campos, retornar erro.
+                valid_fields = 0
+                for v in payload.values():
+                    if v is not None:
+                        valid_fields += 1
+
+                if valid_fields > 1:
+                    del payload['description']
+                    fields = [field for field in payload.keys()]
+                    return make_response(jsonify({"Erro": f"O contrato possui uma ou mais parcelas pagas, logo não é possível editar os campos: {fields}."}), 400)
+
+                # caso já tenha sido pago, editar somente a descrição
+                dao_payment_contract.update_description(updated_contract.description, id)
+
+                
+            return jsonify(updated_contract.get_json())
+        
         except Exception as e:
             dao_payment_contract.rollback_transaction()
             traceback.print_exc()
@@ -73,7 +107,7 @@ def update_payment_contract(id: int):
         return make_response(response.json(), response.status_code)
 
 
-@app_payment_contract.route('/api/v1/payment-contract/', methods=['GET'])
+@app_payment_contract.route('/payment-contract/', methods=['GET'])
 def list_payment_contracts():
     response = __authorize()
 
