@@ -12,6 +12,7 @@ app_payment_contract = Blueprint(
 dao_payment_contract = DAOPaymentContract()
 dao_payment_client = DAOPaymentClient()
 
+
 @app_payment_contract.route('/payment-contract/', methods=['POST'])
 def create_payment_contract():
     response = __authorize()
@@ -20,16 +21,18 @@ def create_payment_contract():
         str_date = flask_request.form.get("first_payment")
         payload = {
             "description": flask_request.form.get("description"),
-            "value": flask_request.form.get("value"),
-            "client_id": flask_request.form.get("client_id"),
-            "number_months": flask_request.form.get("number_months"),
+            "value": float(flask_request.form.get("value")),
+            "client_id": int(flask_request.form.get("client_id")),
+            "number_months": int(flask_request.form.get("number_months")),
             "first_payment": PaymentContract.str_to_date(str_date)
         }
         try:
             payment_contract = PaymentContract(**payload)
             payment_id = dao_payment_contract.save(payment_contract)
-            if payment_id:
-                dao_payment_contract.generate_payment_record(payment_contract)
+            if payment_id is not None:
+                # atribuindo id ao payment_contract para conseguir criar os payments_clients
+                payment_contract.id = payment_id
+                dao_payment_client.generate_payment_record(payment_contract)
                 return jsonify({"id": payment_id})
             else:
                 return make_response(jsonify({"Erro": "Campos obrigatórios"}), 400)
@@ -50,15 +53,15 @@ def update_payment_contract(id: int):
 
     if response.status_code == 200:
         contract_verified: PaymentContract = dao_payment_contract.get_by_id(id)
-        if not contract_verified:
+        if contract_verified is None:
             return make_response({"Erro": f"Não existe contrato com o id {id}"}, 404)
 
         str_date = flask_request.form.get("first_payment")
         payload = {
             "description": flask_request.form.get("description"),
-            "value": flask_request.form.get("value"),
-            "client_id": flask_request.form.get("client_id"),
-            "number_months": flask_request.form.get("number_months"),
+            "value": float(flask_request.form.get("value")),
+            "client_id": int(flask_request.form.get("client_id")),
+            "number_months": int(flask_request.form.get("number_months")),
             "first_payment": PaymentContract.str_to_date(str_date)
         }
 
@@ -77,7 +80,7 @@ def update_payment_contract(id: int):
                 # deletando
                 dao_payment_client.delete_all_by_contract_id(id)
                 # criar
-
+                dao_payment_client.generate_payment_record(updated_contract)
                 # editar
                 dao_payment_contract.update(updated_contract)
 

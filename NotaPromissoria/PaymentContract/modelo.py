@@ -7,7 +7,7 @@ class PaymentContract():
     DATE_FORMAT = "%d/%m/%Y"
     DATETIME_FORMAT = "%d/%m/%Y %H:%M:%S"
 
-    def __init__(self, description, value, number_months, first_payment: datetime.date, client_id=None, id=None, created_at=None):
+    def __init__(self, description: str, value: float, number_months: int, first_payment: datetime.date, client_id=None, id=None, created_at=None):
         self.description = description
         self.value = value
         if created_at:
