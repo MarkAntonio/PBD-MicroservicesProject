@@ -1,11 +1,11 @@
-from .modelo import Client
+from .model import Client
 from .sql import SQLClient
-from ..connect import ConnectDataBase
 
 
 class DAOClient(object):
 
     def __init__(self):
+        from connect import ConnectDataBase
         self.connect = ConnectDataBase().get_instance()
 
     def get_Client(self, client: Client):

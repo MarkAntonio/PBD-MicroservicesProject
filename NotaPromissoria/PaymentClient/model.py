@@ -32,7 +32,6 @@ class PaymentClient:
     def get_json(self):
         return {
             'id': self.id,
-            'contract_id': self.contract_id,
             'value': self.value,
             'date': self.get_str_date(),
             'status': self.status,

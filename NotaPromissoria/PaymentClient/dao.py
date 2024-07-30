@@ -1,13 +1,14 @@
-from .modelo import PaymentClient
+from .model import PaymentClient
 from .sql import SQLPaymentClient
-from ..connect import ConnectDataBase
-from ..PaymentContract.modelo import PaymentContract
+from PaymentContract.model import PaymentContract
 from datetime import timedelta
 
 
 class DAOPaymentClient:
 
     def __init__(self):
+        from connect import ConnectDataBase
+
         self.connect = ConnectDataBase().get_instance()
 
     def get_payments(self):
@@ -23,7 +24,7 @@ class DAOPaymentClient:
 
         return payments_list
 
-    def get_all_payments_by_contract_id(self, contract_id: int):
+    def get_all_payments_by_contract_id(self, contract_id: int): 
         payments_list = []
         with self.connect.cursor() as cursor:
             sql = SQLPaymentClient._SELECT_BY_CONTRACT_ID.format(

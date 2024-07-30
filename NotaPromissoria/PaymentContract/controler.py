@@ -1,8 +1,9 @@
 from flask import Blueprint, make_response, request as flask_request, jsonify
 
-from NotaPromissoria.PaymentClient.dao import DAOPaymentClient
+from PaymentClient import DAOPaymentClient
 from .dao import DAOPaymentContract
-from .modelo import PaymentContract
+from .model import PaymentContract
+from PaymentClient.model import PaymentClient
 import requests
 import traceback
 
@@ -12,6 +13,13 @@ app_payment_contract = Blueprint(
 dao_payment_contract = DAOPaymentContract()
 dao_payment_client = DAOPaymentClient()
 
+def __authorize() -> requests.Response:
+    token = {
+        "authorization": flask_request.headers.get('authorization')
+    }
+    response = requests.post(
+        url='http://localhost:5000/api/v1/authorization/validation/', data=token)
+    return response
 
 @app_payment_contract.route('/payment-contract/', methods=['POST'])
 def create_payment_contract():
@@ -52,29 +60,29 @@ def update_payment_contract(id: int):
     response = __authorize()
 
     if response.status_code == 200:
-        contract_verified: PaymentContract = dao_payment_contract.get_by_id(id)
-        if contract_verified is None:
-            return make_response({"Erro": f"Não existe contrato com o id {id}"}, 404)
-
-        str_date = flask_request.form.get("first_payment")
-        payload = {
-            "description": flask_request.form.get("description"),
-            "value": float(flask_request.form.get("value")),
-            "client_id": int(flask_request.form.get("client_id")),
-            "number_months": int(flask_request.form.get("number_months")),
-            "first_payment": PaymentContract.str_to_date(str_date)
-        }
-
-        updated_contract = PaymentContract(**payload, id=contract_verified.id)
-        payment_clients_list = dao_payment_client.get_all_payments_by_contract_id(id)
-
-        can_edit = True
-        for payment in payment_clients_list:
-            if payment['status'] not in ('PENDING', 'LATE'):
-                can_edit = False
-                break
-           
         try:
+            contract_verified: PaymentContract = dao_payment_contract.get_by_id(id)
+            if contract_verified is None:
+                return make_response({"Erro": f"Não existe contrato com o id {id}"}, 404)
+
+            str_date = flask_request.form.get("first_payment")
+            payload = {
+                "description": flask_request.form.get("description"),
+                "value": float(flask_request.form.get("value")),
+                "client_id": int(flask_request.form.get("client_id")),
+                "number_months": int(flask_request.form.get("number_months")),
+                "first_payment": PaymentContract.str_to_date(str_date)
+            }
+
+            updated_contract = PaymentContract(**payload, id=contract_verified.id)
+            payment_clients_list = dao_payment_client.get_all_payments_by_contract_id(id)
+
+            can_edit = True
+            for payment in payment_clients_list:
+                if payment['status'] not in ('PENDING', 'LATE'):
+                    can_edit = False
+                    break
+        
             # caso não tenha sido pago, deleto os paymentClient e recrio.
             if can_edit:
                 # deletando
@@ -119,7 +127,7 @@ def list_payment_contracts():
     if response.status_code == 200:
         try:
             list_contracts = dao_payment_contract.get_all()
-            return jsonify({"response :": list_contracts})
+            return jsonify({"response": list_contracts})
         except Exception as e:
             dao_payment_contract.rollback_transaction()
             traceback.print_exc()
@@ -128,43 +136,25 @@ def list_payment_contracts():
         return make_response(jsonify({'erro': 'Usuário não autorizado'}), 401)
     else:
         return make_response(response.json(), response.status_code)
-
-
-def __authorize() -> requests.Response:
-    token = {
-        "authorization": flask_request.headers.get('authorization')
-    }
-    response = requests.post(
-        url='http://localhost:5000/api/v1/authorization/validation/', data=token)
-    return response
-
-
-'''
-@app_payment_contract.route('/payment-contract/', methods=['POST'])
-def create_payment_contract():
+    
+# listar parcelas do contrato
+@app_payment_contract.route('/payment-contract/<int:id>', methods=['GET'])
+def list_contract_installments(id: int):
+    # vejo se o token está válido para assim eu puder liberar a rota
     response = __authorize()
-
+    
+    # se o response liberar
     if response.status_code == 200:
-        str_date = flask_request.form.get("first_payment")
-        payload = {
-            "description": flask_request.form.get("description"),
-            "value": flask_request.form.get("value"),
-            "client_id": flask_request.form.get("client_id"),
-            "number_months": flask_request.form.get("number_months"),
-            "first_payment": PaymentContract.str_to_date(str_date)
-        }
         try:
-            payment_id = dao_payment_contract.save(PaymentContract(**payload))
-            if payment_id:
-                return jsonify({"id": payment_id})
-            else:
-                return make_response(jsonify({"Erro": "Campos obrigatórios"}), 400)
+            list_installments: PaymentClient = dao_payment_client.get_all_payments_by_contract_id(id)
+            if list_installments:
+                return jsonify({"response": list_installments})
+            return make_response({"Erro": f"Não existe contrato com o id {id}"}, 404)
         except Exception as e:
-            # desfaz a pré-alteração para conseguir fazer uso novamente da conexão da base.
-            dao_payment_contract.rollback_transaction()
+            # acredito que não preciso fazer rollback, pois ele só é necessário quando existe modificação no Banco
             traceback.print_exc()
             return make_response(jsonify({"Erro": e.args[0]}), 500)
     elif response.status_code == 401:
-        return make_response(jsonify({'erro': 'Usuário não autorizado'}), 401)
+        return make_response(jsonify({"Erro": "Usuário não autorizado"}), 401)
     else:
-        return make_response(response.json(), response.status_code)'''
+        return make_response(response.json(), response.status_code)

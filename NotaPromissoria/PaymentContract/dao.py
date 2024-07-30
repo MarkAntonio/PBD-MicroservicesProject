@@ -1,10 +1,12 @@
-from .modelo import PaymentContract
-from ..connect import ConnectDataBase
+from .model import PaymentContract
 from .sql import SQLPaymentContract
+
 
 class DAOPaymentContract(object):
 
 	def __init__(self):
+		from connect import ConnectDataBase
+
 		self.connect = ConnectDataBase().get_instance()
 
 	def save(self, payment_contract: PaymentContract) -> int:
