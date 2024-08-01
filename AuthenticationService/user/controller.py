@@ -15,11 +15,10 @@ key = 'CHAVE_s3cr3t4'
 
 @app_user.route('/api/v1/authorization/token/', methods=['POST'])
 def login():
-    # exp é o tempo de expiração do token.
-    # coloquei para 5 minutos a frente do tempo atual
+    # para colocar um tempo de expiração do token, é só colocar um atributo no payload. o exemplo abaixo pega o tempo atual do pc do sistema e adiciona  mais 5 minutos (60segundos*5) para que o token tenha duração de 5 minutos:
+    # 'exp': datetime.now(tz=timezone.utc) + timedelta(seconds=60*10)
     payload = {
-        'username': request.form.get('username'),
-        'exp': datetime.now(tz=timezone.utc) + timedelta(seconds=60*10)
+        'username': request.form.get('username')
     }
     #username será a primary key. Password não deverá ser passado no token de devolução
     user_verified = DAO_user.get_user(User(payload['username']))
