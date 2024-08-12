@@ -21,7 +21,8 @@ class SQLPaymentClient:
     _INSERT = f"INSERT INTO {_TABLE_NAME} (contract_id, value, date, status) \
         VALUES (%s, %s, %s, %s) RETURNING ID;"
     _SELECT_ALL = f'SELECT * FROM {_TABLE_NAME};'
-    # _UPDATE_STATUS =  f'UPDATE {_TABLE_NAME} SET {_COL_STATUS}=%s,  WHERE ??????'
     _SELECT_BY_CONTRACT_ID = 'SELECT * FROM {} WHERE contract_id={};'
+    _SELECT_BY_STATUS = f'SELECT * FROM {_TABLE_NAME} WHERE {_COL_CONTRACT_ID}=%s AND status IN %s  ORDER BY {_COL_DATE} ASC LIMIT 1;'
+    _PAY_INSTALLMENT =  f'UPDATE {_TABLE_NAME} SET date_paid = %s, value_paid = %s, status = %s WHERE {_COL_ID} = %s;'
     _DELETE_ALL = 'DELETE FROM {} WHERE contract_id={};'
 

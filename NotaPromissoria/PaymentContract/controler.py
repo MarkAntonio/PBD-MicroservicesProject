@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Blueprint, make_response, request as flask_request, jsonify
 
 from PaymentClient import DAOPaymentClient
@@ -54,6 +55,45 @@ def create_payment_contract():
     else:
         return make_response(response.json(), response.status_code)
 
+
+# Pagar parcelas do contrato 
+@app_payment_contract.route('/payment-client/<int:id>', methods=['PUT'])
+def pay_installments_contract(id: int):
+    response = __authorize()
+
+    if response.status_code == 200:
+        try:
+            contract_verified: PaymentContract = dao_payment_contract.get_by_id(id)
+            if contract_verified is None:
+                return make_response({"Erro": f"Não existe contrato com o id {id}"}, 404)
+            
+            payment = dao_payment_client.get_installment_by_status(id)
+    
+            payload = {
+                    "value": float(flask_request.form.get("value"))
+            }
+            if payment.status == 'PENDING':
+                date_paid = datetime.now().date()
+                if date_paid<= payment.date:
+                    new_status = 'PAID'
+                else:
+                    new_status = 'PAID_LATE'
+                dao_payment_client.pay_installment(payment.id,new_status,date_paid,**payload)
+            return "Payment successfull!"
+
+        except Exception as e:
+            dao_payment_contract.rollback_transaction()
+            traceback.print_exc()
+            return make_response(jsonify({"Erro": e.args[0]}), 500)
+            
+    elif response.status_code == 401:
+        return make_response(jsonify({'erro': 'Usuário não autorizado'}), 401)
+    else:
+        return make_response(response.json(), response.status_code)
+
+
+    
+    
 
 @app_payment_contract.route('/payment-contract/<int:id>', methods=['PUT'])
 def update_payment_contract(id: int):
@@ -158,3 +198,6 @@ def list_contract_installments(id: int):
         return make_response(jsonify({"Erro": "Usuário não autorizado"}), 401)
     else:
         return make_response(response.json(), response.status_code)
+
+
+

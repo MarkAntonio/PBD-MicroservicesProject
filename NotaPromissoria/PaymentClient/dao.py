@@ -1,7 +1,7 @@
 from .model import PaymentClient
 from .sql import SQLPaymentClient
 from PaymentContract.model import PaymentContract
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 
 class DAOPaymentClient:
@@ -40,6 +40,22 @@ class DAOPaymentClient:
 
         return payments_list
 
+    def get_installment_by_status(self, contract_id: int):
+        check_Status = ('LATE', 'PENDING')
+        installment = None
+    
+        with self.connect.cursor() as cursor:
+            sql = SQLPaymentClient._SELECT_BY_STATUS
+            cursor.execute(sql, (contract_id, check_Status))
+            
+            installment_by_status = cursor.fetchone()
+            if installment_by_status:
+                column_name = [descricao[0] for descricao in cursor.description]
+                payment_dict = dict(zip(column_name, installment_by_status))
+                installment = PaymentClient(**payment_dict)
+        
+        return installment
+
     def generate_payment_record(self, paymentContract: PaymentContract):
         # valor das parcelas
         value_payment_record = paymentContract.value / paymentContract.number_months
@@ -61,3 +77,11 @@ class DAOPaymentClient:
             SQLPaymentClient._TABLE_NAME, contract_id)
         cursor.execute(sql)
         self.connect.commit()
+
+    def pay_installment(self,payment_id: int, status: str, date_paid, value):
+        cursor = self.connect.cursor()
+        sql = SQLPaymentClient._PAY_INSTALLMENT
+        cursor.execute(sql,(date_paid, value, status, payment_id))
+        self.connect.commit()
+        cursor.close()
+
