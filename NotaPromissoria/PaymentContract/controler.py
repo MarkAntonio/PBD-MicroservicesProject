@@ -72,14 +72,21 @@ def pay_installments_contract(id: int):
             payload = {
                     "value": float(flask_request.form.get("value"))
             }
-            if payment.status == 'PENDING':
+            if payment is not None:
+
+                if payload["value"] != payment.value:
+                    return make_response(jsonify({"Error": "Valor incorreto"}), 402)
+            
                 date_paid = datetime.now().date()
-                if date_paid<= payment.date:
+                if date_paid <= payment.date:
                     new_status = 'PAID'
                 else:
                     new_status = 'PAID_LATE'
                 dao_payment_client.pay_installment(payment.id,new_status,date_paid,**payload)
-            return "Payment successfull!"
+                
+                return make_response(jsonify({"id": id}))
+            else:
+                return make_response(jsonify({"Error": "Não há mais parcelas pendentes"}), 400)
 
         except Exception as e:
             dao_payment_contract.rollback_transaction()

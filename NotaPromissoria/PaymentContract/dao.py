@@ -36,6 +36,8 @@ class DAOPaymentContract(object):
 					contract_dict['first_payment'] = PaymentContract.date_to_string(contract_dict['first_payment'])
 					contract_dict['created_at'] = PaymentContract.datetime_to_string(contract_dict['created_at'])
 					contracts_list.append(contract_dict)
+					
+		
 		return contracts_list
 
 	def get_by_id(self, id: int) -> PaymentContract:
